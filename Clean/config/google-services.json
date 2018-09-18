@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "120939869444",
+    "firebase_url": "https://fais-ma-vaisselle-53e05.firebaseio.com",
+    "project_id": "fais-ma-vaisselle-53e05",
+    "storage_bucket": "fais-ma-vaisselle-53e05.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120939869444:android:993889ae83128b66",
+        "android_client_info": {
+          "package_name": "kristof.fr.faismavaisselle_10"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "120939869444-gmklksnq9i3egtgj5hpqk3vfrtgcgr7n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kristof.fr.faismavaisselle_10",
+            "certificate_hash": "d0c75ec54856d8b2b0535bdaa49a7e85605d2be2"
+          }
+        },
+        {
+          "client_id": "120939869444-6in712rrntp1to2us3a65uuphqjvhn8j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6mIKDGx5gjwQuk6jn49A3d_r-cpxccYo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "120939869444-8ppgpelgv79a3b5fcj4gpenbkv286h2e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

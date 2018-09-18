@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css?family=Ubuntu');
+
+.landing {
+    background: url(../img/dishes.jpg) no-repeat center center;
+    background-size: cover;
+    -moz-box-shadow:    inset 0 0 0 100vh #06afdad7;
+    -webkit-box-shadow: inset 0 0 0 100vh #06afdad7;
+    box-shadow:         inset 0 0 0 100vh #06afdad7;
+    filter: progid:DXImageTransform.Microsoft.Shadow(color='#06afdad7', Direction=135, Strength=6); 
+}
+
+body {
+    background-color: #f5f5f5;
+    font-family: 'Ubuntu';
+}
+
+.section {
+    height: 100vh;
+}
+
+.cta {
+    position: relative;
+    top: 35%;
+    transform: translateY(-35%);
+    padding: 5rem;
+}
+
+h3 {
+    font-size: 28px;
+    line-height: 38px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+.contact-form {
+    margin-top: 15px;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.contact-form .textarea {
+    min-height: 220px;
+    resize: none;
+}
+
+
+.main-btn {
+    background: #00b09c;
+    border-color: #00b09c;
+    color: #fff;
+}
+
+.btn-gplus {
+    background: rgb(221, 75, 57);
+}
+
+.btn-fb {
+    background: rgb(66, 103, 178);
+}
+
+.main-btn:hover {
+    background: #00a491;
+    color: #fff;
+}
+
+.form-control-feedback {
+    line-height: 50px;
+    top: 0px;
+}
+
+.navbar-toggler.toggler-example {
+    cursor: pointer;
+}
+
+.navbar-brand {
+    font-size: 1.25rem;
+}
+
+.nav-link {
+    font-size: 1.25rem;
+}
+
+#navbar {
+    background: transparent;
+    transition: top 0.3s;
+}
+
+#navbar a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 15px;
+    text-decoration: none;
+}
+
+.sticky {
+    position: fixed;
+    width: 98%;
+    left:1%;
+    top: 0;
+    z-index: 100;
+    border-top: 0;
+}
+
+.navbar-fixed-top.scrolled {
+    background-color: #06afdad7 !important;
+    transition: background-color 200ms linear;
+  }
+
+.onwhite {
+    color: rgba(6, 175, 218, 0.842);
+    font-size: 2.5rem;
+}
+
+.btn-custom {
+    background-color: rgba(6, 175, 218, 0.842);
+    color: rgba(255, 255, 255);
+}
+
+.with-margin {
+    margin-bottom: 15px;
+}
+
+.mtop10 {
+    margin-top: 15px;
+}
+
+li:hover {
+    cursor: pointer;
+}
+
+/* If the screen size is 600px wide or less, set the font-size of <div> to 30px */
+@media screen and (max-width: 991px) {
+    h1 {
+        font-size: 80px;
+    }
+    h3 {
+        font-size: 50px;
+        line-height: 38px;
+        font-weight: 300;
+        color: rgba(255, 255, 255);
+        margin: 0;
+    }
+
+    .navbar a {
+        font-size: 40px;
+    }
+    
+}    
+
+/* If the screen size is 600px wide or less, set the font-size of <div> to 30px */
+@media screen and (min-width: 992px) {
+
+    .navbar a {
+        font-size: 21px;
+    }
+    
+} 

@@ -1,0 +1,51 @@
+<form id="register-form" style="display:none;">
+    <div class="modal-header">
+        <div class="modal-body mx-11">
+            <div class="modalTitle">Pas de compte ?</div>
+        </div>
+        <div class="modal-body mx-1">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+    </div>
+
+    <div class="modal-body">
+        <div class="mx-3">
+            <div id="div-register-msg">
+                <div id="icon-register-msg" class="glyphicon glyphicon-chevron-right"></div>
+                <span id="text-register-msg"></span>
+            </div>
+            <div class="md-form mb-5">
+                <i class="fa fa-envelope prefix grey-text"></i>
+                <input id="register_email" type="email" class="form-control validate" required />
+                <label data-error="Email incorrect" data-success="right" for="register_email">Email</label>
+            </div>
+            <div class="md-form mb-5">
+                <i class="fa fa-lock prefix grey-text"></i>
+                <input name="register_password" class="form-control" type="password" required>
+                <label data-error="epave" data-success="right" class="control-label" for="register_password">Mot de
+                    passe</label>
+            </div>
+            <div class="md-form mb-5">
+                <i class="fa fa-lock prefix grey-text"></i>
+                <input name="register_password2" class="form-control" type="password" required>
+                <label data-error="epave" data-success="right" class="control-label" for="register_password2">Confirme
+                    ton mot de passe</label>
+            </div>
+            <div class="md-form mb-5">
+                <button type="submit" class="btn btn-primary">S'inscrire</button>
+                <button type="button" class="btn btn-gplus" onclick="javascript:launchGooglePopUp();">
+                    <i class="fa fa-google-plus"></i>
+                </button>
+                <button type="button" class="btn btn-fb " onclick="javascript:launchFacebookPopUp();">
+                    <i class="fa fa-facebook"></i>
+                </button>
+            </div>
+        </div>
+        <div class="md-form mb-6">
+            <button id="register_lost_btn" type="button" class="btn btn-link">Mot de passe perdu ?</button>
+            <button id="register_login_btn" type="button" class="btn btn-link">Se connecter</button>
+        </div>
+    </div>
+    </div>
+    </div>
+</form>
