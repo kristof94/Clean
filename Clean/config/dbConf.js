@@ -1,8 +1,8 @@
 const env = {
     database: 'API',
-    username: 'rest',
+    username: 'api',
     password: 'direct11',
-    host: 'localhost',
+    host: '192.168.0.17',
     dialect: 'mysql',
     pool: {
         max: 5,

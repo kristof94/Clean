@@ -1,154 +1,102 @@
-module.exports = function reload (app, opts, server) {
-  // Requires
-  var path = require('path')
-  var fs = require('fs')
-
-  // Parameters variables
-  var httpServerOrPort
-  var expressApp
-  var verboseLogging
-  var port
-  var webSocketServerWaitStart
-
-  // Application variables
-  var RELOAD_FILE = path.join(__dirname, './reload-client.js')
-  var reloadCode = fs.readFileSync(RELOAD_FILE, 'utf8')
-  var route
-
-  // Websocket server variables
-  var ws = require('ws')
-  var WebSocketServer = ws.Server
-  var wss
-
-  // General variables
-  var socketPortSpecified
-  var argumentZero = arguments[0]
-  var reloadJsMatch
-  var reloadReturn
-
-  opts = opts || {}
-
-  if (arguments.length > 0 && (typeof (argumentZero) === 'object' || typeof (argumentZero) === 'function')) {
-    if (typeof (argumentZero) === 'object') { // If old arguments passed handle old arguments, the old arguments and their order were: httpServerOrPort, expressApp, and verboseLogging
-      console.warn('Deprecated Warning: You supplied reload old arguments, please upgrade to the new parameters see: https://github.com/alallier/reload/tree/master#api-for-express')
-      if (arguments.length < 2) {
-        throw new TypeError('Lack of/invalid arguments provided to reload. It is recommended to update to the new arguments anyways, this would be a good time to do so.', 'reload.js', 7)
-      }
-      httpServerOrPort = argumentZero
-      expressApp = arguments[1]
-      verboseLogging = arguments[2]
-      route = '/reload/reload.js'
-    } else { // Setup options or use defaults
-      expressApp = argumentZero
-      port = opts.port || 9856
-      webSocketServerWaitStart = opts.webSocketServerWaitStart
-      route = opts.route
-
-      if (route) {
-        // If reload.js is found in the route option strip it. We will concat it for user to ensure no case errors or order problems.
-        reloadJsMatch = route.match(/reload\.js/i)
-        if (reloadJsMatch) {
-          route = route.split(reloadJsMatch)[0]
-        }
-
-        /*
-         * Concat their provided path (minus `reload.js` if they specified it) with a `/` if they didn't provide one and `reload.js. This allows for us to ensure case, order, and use of `/` is correct
-         * For example these route's are all valid:
-         * 1. `newRoutePath` -> Their route + `/` + reload.js
-         * 2. `newRoutePath/` -> Their route + reload.js
-         * 3. `newRoutePath/reload.js` -> (Strip reload.js above) so now: Their route + reload.js
-         * 4. `newRoutePath/rEload.js` -> (Strip reload.js above) so now: Their route + reload.js
-         * 5. `newRoutePathreload.js` -> (Strip reload.js above) so now: Their route + `/` + reload.js
-         * 6. `newRoutePath/reload.js/rEload.js/... reload.js n number of times -> (Strip above removes all reload.js occurrences at the end of the specified route) so now: Their route + 'reload.js`
-        */
-        route = route + (route.slice(-1) === '/' ? '' : '/') + 'reload.js'
-      } else {
-        route = '/reload/reload.js'
-      }
-
-      verboseLogging = opts.verbose === true || opts.verbose === 'true' || false
-
-      if (port) {
-        socketPortSpecified = port
-        httpServerOrPort = port
-      }
-
-      if (server) {
-        socketPortSpecified = null
-        httpServerOrPort = server
-      }
-    }
-  } else {
-    throw new TypeError('Lack of/invalid arguments provided to reload', 'reload.js', 7)
+(function refresh () {
+  var verboseLogging = false
+  var socketUrl = window.location.origin
+  if (!window.location.origin.match(/:[0-9]+/)) {
+    socketUrl = window.location.origin + ':80'
   }
+  socketUrl = socketUrl.replace() // This is dynamically populated by the reload.js file before it is sent to the browser
+  var socket
 
-  // Application setup
   if (verboseLogging) {
-    reloadCode = reloadCode.replace('verboseLogging = false', 'verboseLogging = true')
-  }
-  reloadCode = reloadCode.replace('socketUrl.replace()', 'socketUrl.replace(/(^http(s?):\\/\\/)(.*:)(.*)/,' + (socketPortSpecified ? '\'ws$2://$3' + socketPortSpecified : '\'ws$2://$3$4') + '\')')
-
-  if (!server) {
-    expressApp.get(route, function (req, res) {
-      res.type('text/javascript')
-      res.send(reloadCode)
-    })
+    console.log('Reload Script Loaded')
   }
 
-  if (!webSocketServerWaitStart) {
-    startWebSocketServer()
+  if (!('WebSocket' in window)) {
+    throw new Error('Reload only works with browsers that support WebSockets')
   }
 
-  // Websocket server setup
-  function startWebSocketServer () {
+  // Explanation of the flags below:
+
+  // The first change flag is used to tell reload to wait until the socket closes at least once before we allow the page to open on a socket open event. Otherwise reload will go into a inifite loop, as the page will have a socket on open event once it loads for the first time
+  var firstChangeFlag = false
+
+  // The navigatedAwayFromPageFlag is set to true in the event handler onbeforeunload because we want to short-circuit reload to prevent it from causing the page to reload before the navigation occurs.
+  var navigatedAwayFromPageFlag
+
+  // Wait until the page loads for the first time and then call the webSocketWaiter function so that we can connect the socket for the first time
+  window.addEventListener('load', function () {
+    if (verboseLogging === true) {
+      console.log('Page Loaded - Calling webSocketWaiter')
+    }
+    websocketWaiter()
+  })
+
+  // If the user navigates away from the page, we want to short-circuit reload to prevent it from causing the page to reload before the navigation occurs.
+  window.addEventListener('beforeunload', function () {
+    if (verboseLogging === true) {
+      console.log('Navigated away from the current URL')
+    }
+
+    navigatedAwayFromPageFlag = true
+  })
+
+  // Check to see if the server sent us reload (meaning a manually reload event was fired) and then reloads the page
+  var socketOnMessage = function (msg) {
+    if (msg.data === 'reload') {
+      socket.close()
+    }
+  }
+
+  var socketOnOpen = function (msg) {
     if (verboseLogging) {
-      console.log('Starting WebSocket Server')
+      console.log('Socket Opened')
     }
 
-    if (socketPortSpecified) { // Use custom user specified port
-      wss = new WebSocketServer({ port: httpServerOrPort })
-    } else { // Attach to server, using server's port. Kept here to support legacy arguments.
-      wss = new WebSocketServer({ server: httpServerOrPort })
-    }
-
-    wss.on('connection', (ws) => {
+    // We only allow the reload on two conditions, one when the socket closed (firstChange === true) and two if we didn't navigate to a new page (navigatedAwayFromPageFlag === false)
+    if (firstChangeFlag === true && navigatedAwayFromPageFlag !== true) {
       if (verboseLogging) {
-        console.log('Reload client connected to server')
+        console.log('Reloaded')
       }
-    })
+
+      // Reset the firstChangeFlag to false so that when the socket on open events are being fired it won't keep reloading the page
+      firstChangeFlag = false
+
+      // Now that everything is set up properly we reload the page
+      window.location.reload()
+    }
   }
 
-  function sendMessage (message) {
+  // Socket on close event that sets flags and calls the webSocketWaiter function
+  var socketOnClose = function (msg) {
     if (verboseLogging) {
-      console.log('Sending message to ' + (wss.clients.size) + ' connection(s): ' + message)
+      console.log('Socket Closed - Calling webSocketWaiter')
     }
 
-    wss.clients.forEach(function each (client) {
-      if (client.readyState === ws.OPEN) {
-        client.send(message)
-      }
-    })
+    // We encountered a change so we set firstChangeFlag to true so that as soon as the server comes back up and the socket opens we can allow the reload
+    firstChangeFlag = true
+
+    // Call the webSocketWaiter function so that we can open a new socket and set the event handlers
+    websocketWaiter()
   }
 
-  reloadReturn = {
-    'reload': function () {
-      sendMessage('reload')
-    },
-    'wss': wss,
-    'startWebSocketServer': function () {
-      if (webSocketServerWaitStart) {
-        startWebSocketServer()
-      }
+  var socketOnError = function (msg) {
+    if (verboseLogging) {
+      console.log(msg)
     }
   }
 
-  if (server) { // Private return API only used in command line version of reload
-    reloadReturn.reloadClientCode = function () {
-      if (server) {
-        return reloadCode
-      }
+  // Function that opens a new socket and sets the event handlers for the socket
+  function websocketWaiter () {
+    if (verboseLogging) {
+      console.log('Waiting for socket')
     }
-  }
+    setTimeout(function () {
+      socket = new WebSocket(socketUrl) // eslint-disable-line
 
-  return reloadReturn
-}
+      socket.onopen = socketOnOpen
+      socket.onclose = socketOnClose
+      socket.onmessage = socketOnMessage
+      socket.onerror = socketOnError
+    }, 250)
+  }
+})()
