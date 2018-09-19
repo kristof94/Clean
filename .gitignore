@@ -259,3 +259,4 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/Clean/config/fais-ma-vaisselle-53e05-firebase-adminsdk-q2nf5-8dfdb3ae0f.json

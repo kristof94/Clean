@@ -64,8 +64,6 @@
     <Compile Include="public\js\validation.js" />
     <Compile Include="route\authRoute.js" />
     <Compile Include="route\user.route.js" />
-    <Content Include="config\fais-ma-vaisselle-53e05-firebase-adminsdk-q2nf5-6c89d5933f.json" />
-    <Content Include="config\google-services.json" />
     <Content Include="package.json" />
     <Content Include="public\css\addons\datatables.css" />
     <Content Include="public\css\addons\datatables.min.css" />
