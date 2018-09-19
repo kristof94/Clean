@@ -22,6 +22,8 @@ routes.get('/profile', cookieCheck, function (req, res) {
   var name = null;
   if(req.decodedClaims.name==null){
     name = req.decodedClaims.email;
+  }else{
+    name = req.decodedClaims.name;
   }
   res.render('profile.ejs', {
     csrfToken: req.csrfToken(),

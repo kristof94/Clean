@@ -17,6 +17,7 @@ app.use(parseForm);
 app.use(express.static('public'));
 app.use(routes);
 app.use(bodyParser.json())
+app.set('views', __dirname + '/views/' );
 
 
 // force: true will drop the table if it already exists
