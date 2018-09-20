@@ -21,7 +21,14 @@ $('document').ready(function () {
 
 
 // Initialize Firebase
-var config = require('../../config/clientGoogleConfig.json');
+var config =  {
+  apiKey: "AIzaSyDiuJrSmfcFoIlME4IRWFtzH836tkWtgwQ",
+  authDomain: "fais-ma-vaisselle-53e05.firebaseapp.com",
+  databaseURL: "https://fais-ma-vaisselle-53e05.firebaseio.com",
+  projectId: "fais-ma-vaisselle-53e05",
+  storageBucket: "fais-ma-vaisselle-53e05.appspot.com",
+  messagingSenderId: "120939869444"
+};
 firebase.initializeApp(config);
 
 function getCookie(name) {

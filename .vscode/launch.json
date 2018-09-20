@@ -4,16 +4,14 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+
         {
             "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "program": "C:\\Users\\chris\\source\\repos\\Clean\\Clean\\app.js",
-            "runtimeExecutable": "browser-refresh",
-            "runtimeArgs": [
-                "--debug"
-            ]
+            "request": "attach",
+            "name": "Node: Nodemon",
+            "processId": "${command:PickProcess}",
+            "restart": true,
+            "protocol": "inspector",
         }
     ]
 }

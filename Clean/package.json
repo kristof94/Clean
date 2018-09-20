@@ -7,7 +7,8 @@
     "name": ""
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "debug": "nodemon --inspect app.js"
   },
   "license": "ISC",
   "dependencies": {
@@ -23,5 +24,8 @@
     "mysql2": "^1.6.1",
     "save": "^2.3.2",
     "sequelize": "^4.38.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.4"
   }
 }

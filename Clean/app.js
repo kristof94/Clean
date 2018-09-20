@@ -14,9 +14,9 @@ app.set('port', process.env.PORT || '8081')
 app.use(cookieParser())
 app.use(csrfProtection);
 app.use(parseForm);
-app.use(express.static('public'));
 app.use(routes);
 app.use(bodyParser.json())
+app.use(express.static('public'));
 app.set('views', __dirname + '/views/' );
 
 
