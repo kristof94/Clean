@@ -1,27 +1,5 @@
-$('document').ready(function () {
-
-  $(document).scroll(function () {
-    var $nav = $(".navbar-fixed-top");
-    $nav.toggleClass('scrolled', $(this).scrollTop() > $nav.height());
-  });
-
-  $("#fakeLoader").hide();
-  $("#fakeLoader").fakeLoader({
-    bgColor:"#06afdad7",
-  });
-  $('.nav-link, nav-item').click(function () {
-    var sectionTo = $(this).attr('href');
-    if(sectionTo != null){
-      $('html, body').animate({
-        scrollTop: $(sectionTo).offset().top
-      }, 1000);
-    }
-  });
-});
-
-
 // Initialize Firebase
-var config =  {
+var config = {
   apiKey: "AIzaSyDiuJrSmfcFoIlME4IRWFtzH836tkWtgwQ",
   authDomain: "fais-ma-vaisselle-53e05.firebaseapp.com",
   databaseURL: "https://fais-ma-vaisselle-53e05.firebaseio.com",
@@ -29,160 +7,136 @@ var config =  {
   storageBucket: "fais-ma-vaisselle-53e05.appspot.com",
   messagingSenderId: "120939869444"
 };
+
 firebase.initializeApp(config);
 
-function getCookie(name) {
-  var cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    var cookies = document.cookie.split(';');
-    for (var i = 0; i < cookies.length; i++) {
-      var cookie = jQuery.trim(cookies[i]);
-      // Does this cookie string begin with the name we want?
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
+firebase.auth().onAuthStateChanged(function (user) {
+  if (user) {
+    console.log('log in');
   }
-  return cookieValue;
+});
+
+function createUser(email, password) {
+  $("#fakeLoader").show();
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(function (userCredential) {
+      userCredential.user.getIdTokenResult(true)
+        .then(function (idToken) {
+          return sendAuthDataToServer(userCredential.user.uid, idToken, userCredential.user,'/register');
+        }).catch(function (error) {
+          console.log(error);
+        });
+    })
+    .catch(function (error) {    
+      msgChange($('#div-register-msg'), $('#icon-register-msg'), $('#text-register-msg'), "error", "glyphicon-remove", error.message);      
+    })
+    .finally(function () {
+      $("#fakeLoader").hide();
+    });
 }
 
-function postTokenToAuth(uid, idToken, user) {
-  $.ajax({
-    url: '/login',
-    type: 'post',
-    headers: {
-      'X-CSRF-Token': $('meta[name=_token]').attr("content")
-    },
-    dataType: 'json',
-    contentType: 'application/json',
-    data: JSON.stringify({
-      uid: uid,
-      idToken: idToken,
-      user: user
-    }),
-    success: function (data) {
-      console.log(data);
-      if (data.success) {
-        window.location.href = "/profile";
-      }
-    },
-    error: function (error, data) {
-      status = error.status;
-      if (status == 401) {
-        firebase.auth().signOut()
-          .then(function () {
-            console.log("ici");
-          })
-          .catch(function (error) {
-
-          });
-      }
-    }
-  });
-}
-
-function initAuthenticationWithFireBase() {
-  launchGooglePopUp();
-}
-
-function launchFacebookPopUp(){
+function launchFacebookPopUp() {
   var provider = new firebase.auth.FacebookAuthProvider();
-  firebase.auth().signInWithPopup(provider).then(function (result) {
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    launchAuth();
-  }).catch(function (error) {
-    // Handle Errors here.
-    console.log(error);
-  });
+  launchAuth(provider);
 }
 
-function detectContext() {
-  console.log(detectContext);
+function launchGooglePopUp() {
+  var provider = new firebase.auth.GoogleAuthProvider();
+  launchAuth(provider);
 }
 
-function sendTokenWithUser() {
-  firebase.auth().currentUser.getIdToken( /* forceRefresh */ true).then(function (idToken) {
-    // Send token to your backend via HTTPS  
-    var user = firebase.auth().currentUser;
-    if (user) {
+function launchAuth(provider) {
+  $("#fakeLoader").show();
+  $('#login-modal').modal('toggle');
+  firebase.auth().signInWithPopup(provider)
+    .then(function (result) {
+      return firebase.auth().currentUser.getIdToken(true);
+    })
+    .then(function (idToken) {
+      var user = firebase.auth().currentUser;
+      if (user == null) {
+        throw new Error("Problème, veuillez réessayer.");
+      }
       var uid = user.uid;
       var userCustom = {
         name: user.displayName,
         email: user.email,
       };
-      postTokenToAuth(uid, idToken, userCustom);
-      console.log('log in');
-    } else {
-      // No user is signed in.
-    }
-  }).catch(function (error) {
-    // Handle error
+      return sendAuthDataToServer(uid, idToken, user,'/login');
+    })
+    .then(function (response) {
+      if (response.success) {
+        window.location.href = response.url;
+      }
+    })
+    .catch(function (error) {
+      msgChange($('#div-login-msg'), $('#icon-login-msg'), $('#text-login-msg'), "error", "glyphicon-remove", error);
+      $('#login-modal').modal();
+    })
+    .finally(function () {
+      $("#fakeLoader").hide();
+    });
+}
+
+function sendAuthDataToServer(uid, idToken, user, url) {
+  return new Promise(function (resolve, reject) {
+    var req = new XMLHttpRequest();
+    req.open('POST', url);
+    req.setRequestHeader("X-CSRF-Token", $('meta[name=_token]').attr("content"));
+    req.setRequestHeader("Content-Type", "application/json");
+    req.onload = function () {
+      if (req.status == 200) {
+        resolve(JSON.parse(req.response));
+      }
+      else {
+        reject(Error(req.statusText));
+      }
+    };
+    req.onerror = function () {
+      reject(Error("Network Error"));
+    };
+    req.send(JSON.stringify({
+      uid: uid,
+      idToken: idToken,
+      user: user
+    }));
+  });
+}
+
+function sendLogOutToServer() {
+  return new Promise(function (resolve, reject) {
+    var req = new XMLHttpRequest();
+    req.open('POST', '/sessionLogout');
+    req.setRequestHeader("X-CSRF-Token", $('meta[name=_token]').attr("content"));
+    req.setRequestHeader("Content-Type", "application/json");
+    req.onload = function () {
+      if (req.status == 200) {
+        resolve(JSON.parse(req.response));
+      }
+      else {
+        reject(Error(req.statusText));
+      }
+    };
+    req.onerror = function () {
+      reject(Error("Network Error"));
+    };
+    req.send();
   });
 }
 
 function logOut() {
   $("#fakeLoader").show();
   firebase.auth().signOut().then(function () {
-    console.log("logOut");
-    $.ajax({
-      url: "/sessionLogout",
-      type: 'post',
-      headers: {
-        'X-CSRF-Token': $('meta[name=_token]').attr("content")
-      },
-      success: function (data) {
-        console.log("success");        
-        if (data) {
-          window.location.href = "/";
-        }
-      },
-      error: function (error, data) {
-        console.log("error");
-        status = error.status;        
+    return sendLogOutToServer();
+  })
+    .then(function (response) {
+      if (response.success) {
+        window.location.href = response.url;
       }
+    })
+    .catch(function (error) { })
+    .finally(function () {
+      $("#fakeLoader").hide();
     });
-  }).catch(function (error) {
-    console.log(error);
-  });
 }
 
-function launch(email,password) {
-  firebase.auth().signInWithEmailAndPassword(email, password)
-  .then(function (result) {
-    if(result.user.emailVerified){
-      launchAuth();
-    }else{
-      console.log("not ok");
-    }
-  }).catch(function (error) {
-      // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      console.log(errorMessage);
-      // ...
-  });
-}
-
-function launchGooglePopUp() {
-  var provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider).then(function (result) {
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    launchAuth();
-  }).catch(function (error) {
-    // Handle Errors here.
-    console.log(error);
-  });
-}
-
-function launchAuth(){
-  $('#login-modal').modal('toggle');
-    $("#fakeLoader").show();    
-    sendTokenWithUser();
-}
-
-firebase.auth().onAuthStateChanged(function (user) {
-  if (user) {
-    console.log('log in');    
-  }
-});

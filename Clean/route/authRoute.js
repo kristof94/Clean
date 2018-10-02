@@ -12,47 +12,60 @@ admin.initializeApp({
 });
 
 routes.get('/', function (req, res) {
-  res.render('index.ejs', {
-    csrfToken: req.csrfToken()
+  const sessionCookie = req.cookies.session || '';
+  admin.auth().verifySessionCookie(sessionCookie, true /** checkRevoked */).then((decodedClaims) => {
+    name = decodedClaims.name == null ? decodedClaims.email : decodedClaims.name;
+    res.render('profile.ejs', {
+      csrfToken: req.csrfToken(),
+      name: name
+    });
+  }).catch(error => {
+    res.render('index.ejs', {
+      csrfToken: req.csrfToken()
+    });
   });
 });
 
-routes.get('/profile', cookieCheck, function (req, res) {
-  console.log(req.decodedClaims);
-  var name = null;
-  if(req.decodedClaims.name==null){
-    name = req.decodedClaims.email;
-  }else{
-    name = req.decodedClaims.name;
-  }
-  res.render('profile.ejs', {
-    csrfToken: req.csrfToken(),
-    name: name,
-  });
-});
-
-routes.post('/login',bodyParser.json(), cookieGenerator, function (req, res,next) {    
+routes.post('/login', bodyParser.json(), cookieGenerator, function (req, res, next) {
   admin.auth().getUserByEmail(req.body.user.email)
-  .then(function(userRecord) {
-    users.create(req,res);
-    next();
-  })
-  .catch(function(error) {
-    res.redirect('/');
-  });  
+    .then(function (userRecord) {
+      res.status(200).send({
+        success: true,
+        url: '/'
+      });
+    })
+    .catch(function (error) {
+      res.redirect('/');
+    });
 });
 
-routes.post('/sessionLogout',cookieCheck, (req, res) => {
+routes.post('/register', bodyParser.json(), function (req, res, next) {  
+  idToken = req.body.idToken.token;
+  admin.auth().verifyIdToken(idToken).then((decodedIdToken) => {
+    return users.create(req,res);
+  })
+  .then(data => {
+    console.log(data);
+  })
+  .catch(error=>{
+    res.status(401).send('UNAUTHORIZED REQUEST!');
+  });
+});
+
+
+routes.post('/sessionLogout', cookieCheck, (req, res) => {
   const sessionCookie = req.cookies.session || '';
   res.clearCookie('session');
   admin.auth().verifySessionCookie(sessionCookie).then((decodedClaims) => {
     return admin.auth().revokeRefreshTokens(decodedClaims.sub);
   }).then(() => {
-    res.redirect('/');
+    res.status(200).send({
+      success: true,
+      url: '/'
+    });
   }).catch((error) => {
     res.redirect('/');
   });
 });
-
 
 module.exports = routes;

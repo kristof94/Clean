@@ -115,6 +115,9 @@ h3 {
     font-size: 2.5rem;
 }
 
+.text{
+    color:#9e9e9e;
+}
 .btn-custom {
     background-color: rgba(6, 175, 218, 0.842);
     color: rgba(255, 255, 255);

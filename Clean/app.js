@@ -10,12 +10,12 @@ var csrfProtection = csrf({ cookie: true });
 var parseForm = bodyParser.urlencoded({ extended: false });
 var app = express();
 
-app.set('port', process.env.PORT || '8081')
-app.use(cookieParser())
+app.set('port', process.env.PORT || '8080')
+app.use(cookieParser());
 app.use(csrfProtection);
 app.use(parseForm);
 app.use(routes);
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 app.use(express.static('public'));
 app.set('views', __dirname + '/views/' );
 
@@ -37,7 +37,7 @@ server.listen(app.get('port'), function () {
     var host = server.address().address;
     var port = server.address().port;
     var url = 'http://localhost:' + app.get('port');
-    console.log("App listening at url");
+    console.log("   App listening at url");
     if (process.send) {
         process.send({ event: 'online', url: url });
     }

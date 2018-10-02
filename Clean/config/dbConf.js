@@ -4,6 +4,7 @@ const env = {
     password: 'direct11',
     host: '192.168.0.17',
     dialect: 'mysql',
+    port: 3306,
     pool: {
         max: 5,
         min: 0,
