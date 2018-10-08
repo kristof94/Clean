@@ -2,16 +2,11 @@ const db = require('../config/db');
 const User = db.users;
 
 // Post a Customer
-exports.create = (req, res) => {
+exports.create = (name,email) => {
     // Save to MySQL database
-    User.create({
-        firstname: req.body.user.name,
-        email: req.body.user.email,
-    }).then(user => {
-        // Send created customer to client
-        res.send(user);
-    }).catch((error)=>{
-        res.status(401).end();
+    return User.create({
+        firstname: name,
+        email: email,
     });
 };
 
@@ -20,6 +15,14 @@ exports.findAll = (req, res) => {
     User.findAll().then(users => {
         // Send all customers to Client
         res.send(users);
+    });
+};
+
+exports.listAll = (func) => {
+    User.findAll().then(users => {
+        users.forEach(item => {
+            func(item.id);
+        });
     });
 };
 
@@ -42,6 +45,16 @@ exports.update = (req, res) => {
         }
     }).then(() => {
         res.status(200).send("updated successfully a user with id = " + id);
+    });
+};
+
+exports.remove = (id) => {
+    User.destroy({
+        where: {
+            id: id
+        }
+    }).then(() => {
+        console.log('deleted successfully a user with id = ' + id);
     });
 };
 

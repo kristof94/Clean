@@ -29,7 +29,7 @@ $(function () {
             case "login-form":
                 var $lg_email = $('#login_email').val();
                 var $lg_password = $('#login_password').val();
-                msgChange($('#div-login-msg'), $('#icon-login-msg'), $('#text-login-msg'), "success", "glyphicon-ok", "Login QIJSOQJS");
+                signUser($lg_email,$lg_password);
                 return false;
                 break;
             case "lost-form":
@@ -100,30 +100,22 @@ function modalAnimate($oldForm, $newForm) {
 
 function msgFade($msgId, $msgText) {
     $msgId.fadeOut($msgAnimateTime, function () {
-        $(this).text($msgText).fadeIn($msgAnimateTime);
+        $(this).html($msgText).fadeIn($msgAnimateTime);
     });
 }
 
 function clearMsgChange($divTag, $iconTag, $divClass, $iconClass) {
     $divTag.empty();    
     $divTag.removeClass($divClass);
-    $iconTag.addClass("glyphicon-chevron-right");
-    $iconTag.removeClass($iconClass + " " + $divClass);
+    $textTag.removeAttr('class').attr('class', '');
 }
 
-function msgChange($divTag, $iconTag, $textTag, $divClass, $iconClass, $msgText) {
-    var $msgOld = $divTag.text();
-    msgFade($textTag, $msgText);
-    $divTag.addClass($divClass);
-    $iconTag.removeClass("glyphicon-chevron-right");
-    $iconTag.addClass($iconClass + " " + $divClass);
-    /*setTimeout(function () {
-        msgFade($textTag, $msgOld);
-        $divTag.removeClass($divClass);
-        $iconTag.addClass("glyphicon-chevron-right");
-        $iconTag.removeClass($iconClass + " " + $divClass);
-    }, $msgShowTime);    
-    */
+function msgChange($divTag, $textTag, $divClass, $msgText) {
+    $textTag.removeAttr('class').attr('class', '');
+    $textTag.addClass($divClass);
+    $textTag.fadeOut($msgAnimateTime, function () {
+        $(this).html($msgText).fadeIn($msgAnimateTime);
+    });
 }
 
 function clearInput($input, $label) {
