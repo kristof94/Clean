@@ -139,7 +139,7 @@ function registerWithFaceBook() {
       }
     })
     .catch(function (error) {
-      msgChange($('#div-register-msg'), $('#text-register-msg'), "text-danger", error);      
+      msgChange($('#div-register-msg'), $('#text-register-msg'), "text-danger", error.message);      
     })
     .finally(() => {
       displayLoading($modal, false);
@@ -162,14 +162,15 @@ function launchAuth(provider) {
       if (response.code === 100) {
         $('#login-modal').modal();
         $("#fakeLoader").hide();
-        msgChange($('#div-login-msg'), $('#text-login-msg'), "text-primary", response.message);
+        var message = "Nous avons envoyé un lien de confirmation à cette adresse " + firebase.auth().currentUser.email + ". Cliquez <a href='javascript:sendMessage(\"#register-modal\")'>ici</a> si vous ne l'avez pas reçu.";
+        msgChange($('#div-login-msg'), $('#text-login-msg'), "text-secondary", message);
       } else {
         window.location.href = response.url;
       }
     })
     .catch(function (error) {
       displayLoading($modal, false);
-      msgChange($('#div-login-msg'), $('#text-login-msg'), "text-danger", error);
+      msgChange($('#div-login-msg'), $('#text-login-msg'), "text-danger", error.message);
     })
     .finally(() => {
 
