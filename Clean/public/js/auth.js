@@ -19,11 +19,12 @@ firebase.auth().onAuthStateChanged(function (user) {
 
 function displayLoading($modal, on) {
   if (on) {
-    $modal.modal('toggle');
     $("#fakeLoader").show();
+    $modal.modal('toggle');
   } else {
-    $modal.modal();
+    $('body').removeClass().removeAttr('style'); $('.modal-backdrop').remove();
     $("#fakeLoader").hide();
+    $modal.modal();
   }
 }
 
@@ -73,7 +74,7 @@ function signUser(email, password) {
     })
     .catch(function (error) {
       displayLoading($modal, false);
-      msgChange($('#div-login-msg'), $('#text-login-msg'), "text-danger", error);
+      msgChange($('#div-login-msg'), $('#text-login-msg'), "text-danger", error.message);
     })
     .finally(() => {
 
@@ -139,7 +140,7 @@ function registerWithFaceBook() {
       }
     })
     .catch(function (error) {
-      msgChange($('#div-register-msg'), $('#text-register-msg'), "text-danger", error.message);      
+      msgChange($('#div-register-msg'), $('#text-register-msg'), "text-danger", error.message);
     })
     .finally(() => {
       displayLoading($modal, false);
